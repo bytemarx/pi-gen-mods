@@ -246,6 +246,8 @@ export QUILT_REFRESH_ARGS="-p ab"
 
 export ENABLE_CLOUD_INIT=${ENABLE_CLOUD_INIT:-1}
 
+export LUKS_PASSPHRASE
+
 # shellcheck source=scripts/common
 source "${SCRIPT_DIR}/common"
 # shellcheck source=scripts/dependencies_check

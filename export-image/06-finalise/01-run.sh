@@ -102,6 +102,12 @@ ROOT_DEV="$(awk "\$2 == \"${ROOTFS_DIR}\" {print \$1}" /etc/mtab)"
 unmount "${ROOTFS_DIR}"
 zerofree "${ROOT_DEV}"
 
+# NEW: if ROOT_DEV is the LUKS-mapped device (e.g. /dev/mapper/cryptroot),
+# close it so that unmount_image can detach the underlying loop device.
+if cryptsetup status cryptroot >/dev/null 2>&1; then
+	cryptsetup luksClose cryptroot || log "Warning: failed to close cryptroot (may already be closed)"
+fi
+
 unmount_image "${IMG_FILE}"
 
 if hash bmaptool 2>/dev/null; then
