@@ -36,6 +36,10 @@ disable_overscan=1
 # Run as fast as firmware / board allows
 arm_boost=1
 
+# Disable WiFi/Bluetooth
+dtoverlay=disable-wifi
+dtoverlay=disable-bt
+
 # Enable USB gadget mode
 dtoverlay=dwc2,dr_mode=peripheral
 
