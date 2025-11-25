@@ -112,7 +112,7 @@ ROOT_PARTUUID="$(blkid -s PARTUUID -o value "${ROOT_PART}")"
 
 # /etc/crypttab: cryptroot from the underlying partition
 cat > "${ROOTFS_DIR}/etc/crypttab" <<EOF
-cryptroot PARTUUID=${ROOT_PARTUUID} none luks,discard
+cryptroot PARTUUID=${ROOT_PARTUUID} none luks,discard,initramfs,keyscript=/usr/local/sbin/cryptroot-usb-askpass
 EOF
 
 # /etc/fstab: root from /dev/mapper/cryptroot (Debian-style)

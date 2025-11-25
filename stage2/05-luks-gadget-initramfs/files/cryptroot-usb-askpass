@@ -1,0 +1,47 @@
+#!/bin/sh
+set -e
+
+# Wait a bit for the gadget serial device to appear.
+max_wait=30
+while [ ! -c /dev/ttyGS0 ] && [ "$max_wait" -gt 0 ]; do
+    sleep 1
+    max_wait=`expr "$max_wait" - 1`
+done
+
+TTY=/dev/ttyGS0
+if [ ! -c "$TTY" ]; then
+    # Fallback: use the kernel console if gadget serial is not available.
+    TTY=/dev/console
+fi
+
+# Save cryptsetup's stdout so we can send the passphrase back on fd 3.
+exec 3>&1
+
+# For the interactive part, talk to the TTY:
+#   - stdin  from TTY
+#   - stderr to TTY (for prompts)
+# stdout stays as the pipe back to cryptsetup.
+exec <"$TTY" 2>"$TTY"
+
+# --- Handshake: wait for a first line from the host and discard it ---
+# This ensures we don't print anything until a host has actually connected
+# and sent at least one newline / keystroke.
+IFS= read -r _junk || _junk=""
+
+printf 'LUKS passphrase for root: ' >&2
+
+# Suppress echo if stty is available.
+if command -v stty >/dev/null 2>&1; then
+    stty -echo || true
+fi
+
+IFS= read -r PASS || PASS=""
+
+if command -v stty >/dev/null 2>&1; then
+    stty echo || true
+fi
+
+printf '\n' >&2
+
+# Send the passphrase back to cryptsetup via fd 3 (original stdout).
+printf '%s' "$PASS" >&3

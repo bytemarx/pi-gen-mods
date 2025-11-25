@@ -26,11 +26,14 @@ ROOT_PART_START=$((BOOT_PART_START + BOOT_PART_SIZE))
 ROOT_PART_SIZE=$(((ROOT_SIZE + ROOT_MARGIN + ALIGN  - 1) / ALIGN * ALIGN))
 IMG_SIZE=$((BOOT_PART_START + BOOT_PART_SIZE + ROOT_PART_SIZE))
 
+# Re-create the image file
 truncate -s "${IMG_SIZE}" "${IMG_FILE}"
 
-parted --script "${IMG_FILE}" mklabel msdos
-parted --script "${IMG_FILE}" unit B mkpart primary fat32 "${BOOT_PART_START}" "$((BOOT_PART_START + BOOT_PART_SIZE - 1))"
-parted --script "${IMG_FILE}" unit B mkpart primary ext4 "${ROOT_PART_START}" "$((ROOT_PART_START + ROOT_PART_SIZE - 1))"
+# Create a MSDOS partition table in the newly re-created image file
+# and create a FAT32 boot partition and a EXT4 root partition
+parted -s "${IMG_FILE}" mklabel msdos
+parted -s "${IMG_FILE}" unit B mkpart primary fat32 "${BOOT_PART_START}" "$((BOOT_PART_START + BOOT_PART_SIZE - 1))"
+parted -s "${IMG_FILE}" unit B mkpart primary ext4 "${ROOT_PART_START}" "$((ROOT_PART_START + ROOT_PART_SIZE - 1))"
 
 echo "Creating loop device..."
 cnt=0

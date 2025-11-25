@@ -1,0 +1,21 @@
+#!/bin/sh
+
+PREREQ=""
+prereqs() { echo "$PREREQ"; }
+
+case "$1" in
+    prereqs)
+        prereqs
+        exit 0
+        ;;
+esac
+
+# Give udev a short window to create /dev/ttyGS0 before cryptsetup runs.
+i=0
+max_wait=5
+while [ ! -c /dev/ttyGS0 ] && [ "$i" -lt "$max_wait" ]; do
+    sleep 1
+    i=`expr "$i" + 1`
+done
+
+exit 0
